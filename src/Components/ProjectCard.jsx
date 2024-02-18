@@ -1,17 +1,18 @@
 import React, { useState } from 'react'
 import { Card, Modal, Row ,Col } from 'react-bootstrap'
+import SERVER_URL from '../services/serverUrl';
 
-function ProjectCard() {
+function ProjectCard({project}) {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   return (
     <>
-     <Card className='shadow mb-5 btn' style={{ width: '28rem' }} onClick={handleShow}>
-      <Card.Img variant="top" src="https://png.pngtree.com/thumb_back/fh260/background/20200731/pngtree-blue-carbon-background-with-sport-style-and-golden-light-image_371487.jpg" />
+     <Card className='shadow mb-5 btn' style={{ width: '28rem' ,height:'300px'}} onClick={handleShow}>
+      <Card.Img style={{height:'200px'}} variant="top" src={`${SERVER_URL}/uploads/${project?.projectImg}`}/>
       <Card.Body>
-        <Card.Title className='text-dark'>Card Title</Card.Title>
+        <Card.Title className='text-dark'>{project?.title}</Card.Title>
        
       </Card.Body>
     </Card>
@@ -23,17 +24,17 @@ function ProjectCard() {
         <Modal.Body>
           <Row>
             <Col sm={12} md={6}>
-                  <img className='img-fluid' src="https://png.pngtree.com/thumb_back/fh260/background/20200731/pngtree-blue-carbon-background-with-sport-style-and-golden-light-image_371487.jpg" alt="Project image" />
+                  <img className='img-fluid' src={`${SERVER_URL}/uploads/${project?.projectImg}`} alt="Project image" />
             </Col>
             <Col sm={12} md={6}>
-              <h2 className='fw-bolder text-warning'>Title</h2>
-              <p>Project Overview:<span className='fw-bolder'>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ea id, deserunt vero, veritatis illum commodi voluptatum nostrum cumque reiciendis iusto cum molestias voluptas dolorum vel ducimus harum debitis iste quae!</span></p>
-              <p>Language used:<span className='fw-bolder text-danger'>HTML,CSS,JS</span></p>
+              <h2 className='fw-bolder text-warning'>{project?.title}</h2>
+              <p>Project Overview:<span className='fw-bolder'>{project?.overview}</span></p>
+              <p>Language used:<span className='fw-bolder text-danger'>{project?.language}</span></p>
             </Col>
           </Row>
           <div className='mt-3'>
-              <a href="" target='_blank' style={{cursor:'pointer',color:'black'}}><i style={{height:'34px'}} className='fa-brands fa-github fa-2x'></i></a>
-              <a href="" target='_blank' style={{cursor:'pointer',color:'black'}} className='ms-5'><i style={{height:'34px'}} className='fa-solid fa-link fa-2x'></i></a>
+              <a href={project?.github} target='_blank' style={{cursor:'pointer',color:'black'}}><i style={{height:'34px'}} className='fa-brands fa-github fa-2x'></i></a>
+              <a href={project?.website} target='_blank' style={{cursor:'pointer',color:'black'}} className='ms-5'><i style={{height:'34px'}} className='fa-solid fa-link fa-2x'></i></a>
 
           </div>
         </Modal.Body>

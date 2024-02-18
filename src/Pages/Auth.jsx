@@ -1,10 +1,76 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import auth from '../assets/auth.png'
-import { Form } from 'react-bootstrap'
+import { Form, Spinner } from 'react-bootstrap'
+import { ToastContainer,toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
+import { loginAPI, registerAPI } from '../services/allApi'
+import { tokenAuthContext } from '../Context/TokenAuth'
 
 
 function Auth({ insideRegister }) {
+  const {isAuthorised,setAuthorised}=useContext(tokenAuthContext)
+  const [loginStatus,setloginStatus]=useState(false)
+  const navigate= useNavigate()
+  const [userInputData,setuserInputData]=useState({
+    username:"",email:"",password:""
+  })
+  const handleRegister=async(e)=>{
+     e.preventDefault()
+    // console.log(userInputData);
+    const {username,email,password}=userInputData
+    if(!username||!email||!password){
+      toast.info("Please fill the form completely!!")
+    }else{
+      try{
+        const result =await registerAPI(userInputData)
+        console.log(result);
+        if(result.status===200){
+          toast.warning(`Welcome ${result.data.username}....Please login to explore our site!!!`)
+          setTimeout(()=>{
+            setuserInputData({username:"",email:"",password:""})
+            //navigate to login
+            navigate("/login")
+          },2000)
+        }else{
+          toast.error(result.response.data)
+        }
+      }catch(err){
+        console.log(err);
+      }
+    }
+  }
+  const handleLogin=async(e)=>{
+    e.preventDefault()
+   // console.log(userInputData);
+   const {email,password}=userInputData
+   if(!email||!password){
+     toast.info("Please fill the form completely!!")
+   }else{
+     try{
+       const result =await loginAPI({email,password})
+       console.log(result);
+       if(result.status===200){
+         //store token and username
+         sessionStorage.setItem("username",result.data.existingUser.username)
+         sessionStorage.setItem("token",result.data.token)
+         sessionStorage.setItem("userDetails",JSON.stringify(result.data.existingUser))
+         setloginStatus(true)
+         setAuthorised(true)
+         setuserInputData({email:"",password:""})
+         //navigate to landingpage
+         setTimeout(()=>{
+           navigate("/")
+         },2000)
+       }else{
+         toast.error(result.response.data)
+       }
+     }catch(err){
+       console.log(err);
+     }
+   }
+ }
+
   return (
     <div style={{ width: '100%', height: '100vh' }} className='d-flex justify-content-center align-items-center'>
       <div className='container w-75'>
@@ -22,22 +88,22 @@ function Auth({ insideRegister }) {
               <Form>
                 {insideRegister &&
                   <Form.Group className="mb-3" controlId="formBasicName">
-                    <Form.Control type="text" placeholder="Enter Name" />
+                    <Form.Control type="text" placeholder="Enter Name" value={userInputData.username} onChange={e=>setuserInputData({...userInputData,username:e.target.value})}/>
                   </Form.Group>}
                 <Form.Group className="mb-3" controlId="formBasicEmail">
-                  <Form.Control type="email" placeholder="Enter email" />
+                  <Form.Control type="email" placeholder="Enter email" value={userInputData.email} onChange={e=>setuserInputData({...userInputData,email:e.target.value})}/>
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="formBasicPassword">
-                  <Form.Control type="password" placeholder="Enter Password" />
+                  <Form.Control type="password" placeholder="Enter Password" value={userInputData.password} onChange={e=>setuserInputData({...userInputData,password:e.target.value})} />
                 </Form.Group>
                 {
                   insideRegister ?
                     <div>
-                      <button className='btn btn-light mb-2'>Register</button>
+                      <button onClick={handleRegister} className='btn btn-light mb-2'>Register</button>
                       <p>Already have Account? Click here to <Link to={'/login'} className='text-light'>Login</Link></p>
                     </div> :
                     <div>
-                      <button className='btn btn-light mb-2'>Login</button>
+                      <button onClick={handleLogin} className='btn btn-light mb-2'>Login  {loginStatus&&<Spinner animation="border" variant="secondary" />}</button>
                       <p>New User? Click here to <Link to={'/register'} className='text-light'>Register</Link></p>
                     </div>
                 }
@@ -47,6 +113,7 @@ function Auth({ insideRegister }) {
           </div>
         </div>
       </div>
+      <ToastContainer autoClose={3000} theme='colored'/>
     </div>
   )
 }
